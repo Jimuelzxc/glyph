@@ -67,7 +67,6 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
 import { ChunkBubbleMenu } from "@/components/chunk-bubble-menu"
-import { ChunkResults } from "@/components/chunk-results"
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
@@ -298,9 +297,6 @@ export function SimpleEditor() {
         {/* Add the bubble menu */}
         {editor && <ChunkBubbleMenu editor={editor} />}
       </EditorContext.Provider>
-
-      {/* Add the results display */}
-      <ChunkResults />
     </div>
   )
 }

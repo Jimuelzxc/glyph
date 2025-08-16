@@ -9,7 +9,7 @@ import { Image } from "@tiptap/extension-image"
 import { TaskItem, TaskList } from "@tiptap/extension-list"
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
-import { Highlight } from "@tiptap/extension-highlight"
+import { ClickableHighlight } from "@/components/tiptap-node/clickable-highlight-extension"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Selection } from "@tiptap/extensions"
@@ -33,6 +33,7 @@ import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/heading-node/heading-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
+import "@/components/tiptap-node/clickable-highlight-extension/clickable-highlight-extension.scss"
 
 // --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
@@ -230,7 +231,12 @@ export function SimpleEditor() {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
+      ClickableHighlight.configure({ 
+        multicolor: true,
+        onHighlightClick: (text: string, color?: string) => {
+          console.log('Clicked highlighted text:', { text, color })
+        }
+      }),
       Image,
       Typography,
       Superscript,

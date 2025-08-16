@@ -27,6 +27,7 @@ interface VisualIdeas {
 export default function KeywordPage({ params }: KeywordPageProps) {
     const resolvedParams = use(params)
     const keyword = decodeURIComponent(resolvedParams.slug)
+    const keywordType = keyword.includes(' ') ? 'phrase' : 'keyword'
     const router = useRouter()
     const { originalText } = useChunkStore()
     
@@ -125,6 +126,16 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                             lineHeight: '1.2'
                         }}>
                             {keyword}
+                            <span
+                                style={{
+                                    fontSize: '1.25rem',
+                                    opacity: 0.6,
+                                    marginLeft: '0.5rem',
+                                    fontWeight: 'normal',
+                                }}
+                            >
+                                ({keywordType})
+                            </span>
                         </h1>
                         
                         <button 

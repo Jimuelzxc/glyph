@@ -33,6 +33,8 @@ export default function KeywordPage({ params }: KeywordPageProps) {
     const [visualIdeas, setVisualIdeas] = useState<VisualIdeas | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [selectedIdea, setSelectedIdea] = useState<string | null>(null)
+    const [showPopup, setShowPopup] = useState(false)
 
     useEffect(() => {
         const fetchVisualIdeas = async () => {
@@ -295,7 +297,8 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                                     }}
                                     onClick={() => {
-                                        navigator.clipboard.writeText(idea)
+                                        setSelectedIdea(idea)
+                                        setShowPopup(true)
                                         // Add a subtle click animation
                                         const element = document.querySelector(`.idea-card-${index}`) as HTMLElement
                                         if (element) {
@@ -333,7 +336,7 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                             transition: 'opacity 0.3s ease',
                                             pointerEvents: 'none'
                                         }} className={`copy-hint-${index}`}>
-                                            click to copy
+                                            click to search
                                         </div>
                                     </div>
                                     
@@ -361,6 +364,309 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                     )}
                 </div>
             </div>
+
+            {/* Search Options Popup */}
+            {showPopup && selectedIdea && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    backdropFilter: 'blur(4px)'
+                }}
+                onClick={() => setShowPopup(false)}
+                >
+                    <div style={{
+                        backgroundColor: 'var(--tt-bg-color)',
+                        border: '2px solid var(--tt-gray-light-a-200)',
+                        borderRadius: '0.75rem',
+                        padding: '2rem',
+                        maxWidth: '400px',
+                        width: '90%',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                        transform: 'scale(1)',
+                        animation: 'popupAppear 0.2s ease-out'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div style={{
+                            marginBottom: '1.5rem',
+                            textAlign: 'center'
+                        }}>
+                            <h3 style={{
+                                fontFamily: '"DM Sans", sans-serif',
+                                fontSize: '1.25rem',
+                                fontWeight: '600',
+                                color: 'var(--tt-theme-text)',
+                                marginBottom: '0.5rem'
+                            }}>
+                                Search for Images
+                            </h3>
+                            <p style={{
+                                fontFamily: '"Inter", sans-serif',
+                                fontSize: '0.875rem',
+                                color: 'var(--tt-theme-text)',
+                                opacity: 0.7,
+                                backgroundColor: 'var(--tt-bg-color-contrast)',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.375rem',
+                                border: '1px solid var(--tt-gray-light-a-100)'
+                            }}>
+                                "{selectedIdea}"
+                            </p>
+                        </div>
+
+                        {/* Search Options */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem',
+                            marginBottom: '1.5rem'
+                        }}>
+                            {/* Google Images */}
+                            <button
+                                onClick={() => {
+                                    const query = encodeURIComponent(selectedIdea)
+                                    window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank')
+                                    setShowPopup(false)
+                                }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    padding: '1rem',
+                                    backgroundColor: 'var(--tt-bg-color-contrast)',
+                                    border: '2px solid var(--tt-gray-light-a-100)',
+                                    borderRadius: '0.5rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    fontFamily: '"Inter", sans-serif',
+                                    fontSize: '0.875rem',
+                                    color: 'var(--tt-theme-text)',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)'
+                                    e.currentTarget.style.transform = 'scale(1.02)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-bg-color-contrast)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-100)'
+                                    e.currentTarget.style.transform = 'scale(1)'
+                                }}
+                            >
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#4285f4',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                }}>
+                                    G
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: '500' }}>Google Images</div>
+                                    <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>Search millions of images</div>
+                                </div>
+                            </button>
+
+                            {/* Freepik */}
+                            <button
+                                onClick={() => {
+                                    const query = encodeURIComponent(selectedIdea.replace(/\s+/g, '-'))
+                                    window.open(`https://www.freepik.com/free-photos-vectors/${query}`, '_blank')
+                                    setShowPopup(false)
+                                }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    padding: '1rem',
+                                    backgroundColor: 'var(--tt-bg-color-contrast)',
+                                    border: '2px solid var(--tt-gray-light-a-100)',
+                                    borderRadius: '0.5rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    fontFamily: '"Inter", sans-serif',
+                                    fontSize: '0.875rem',
+                                    color: 'var(--tt-theme-text)',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)'
+                                    e.currentTarget.style.transform = 'scale(1.02)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-bg-color-contrast)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-100)'
+                                    e.currentTarget.style.transform = 'scale(1)'
+                                }}
+                            >
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#00d4aa',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                }}>
+                                    F
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: '500' }}>Freepik</div>
+                                    <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>Free vectors and photos</div>
+                                </div>
+                            </button>
+
+                            {/* Pinterest */}
+                            <button
+                                onClick={() => {
+                                    const query = encodeURIComponent(selectedIdea)
+                                    window.open(`https://ph.pinterest.com/search/pins/?q=${query}`, '_blank')
+                                    setShowPopup(false)
+                                }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    padding: '1rem',
+                                    backgroundColor: 'var(--tt-bg-color-contrast)',
+                                    border: '2px solid var(--tt-gray-light-a-100)',
+                                    borderRadius: '0.5rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    fontFamily: '"Inter", sans-serif',
+                                    fontSize: '0.875rem',
+                                    color: 'var(--tt-theme-text)',
+                                    textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)'
+                                    e.currentTarget.style.transform = 'scale(1.02)'
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'var(--tt-bg-color-contrast)'
+                                    e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-100)'
+                                    e.currentTarget.style.transform = 'scale(1)'
+                                }}
+                            >
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#e60023',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold'
+                                }}>
+                                    P
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: '500' }}>Pinterest</div>
+                                    <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>Visual inspiration</div>
+                                </div>
+                            </button>
+                        </div>
+
+                        {/* Copy Option */}
+                        <div style={{
+                            borderTop: '1px solid var(--tt-gray-light-a-100)',
+                            paddingTop: '1rem',
+                            textAlign: 'center'
+                        }}>
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(selectedIdea)
+                                    setShowPopup(false)
+                                }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--tt-theme-text)',
+                                    opacity: 0.6,
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    fontFamily: '"Inter", sans-serif',
+                                    transition: 'opacity 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                            >
+                                Just copy text instead
+                            </button>
+                        </div>
+
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowPopup(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '1rem',
+                                right: '1rem',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--tt-theme-text)',
+                                opacity: 0.5,
+                                cursor: 'pointer',
+                                fontSize: '1.5rem',
+                                width: '2rem',
+                                height: '2rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.opacity = '1'
+                                e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-100)'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.opacity = '0.5'
+                                e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                        >
+                            ×
+                        </button>
+
+                        {/* CSS Animation */}
+                        <style jsx>{`
+                            @keyframes popupAppear {
+                                from {
+                                    opacity: 0;
+                                    transform: scale(0.9);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: scale(1);
+                                }
+                            }
+                        `}</style>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

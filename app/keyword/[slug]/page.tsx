@@ -33,42 +33,67 @@ export default function KeywordPage({ params }: KeywordPageProps) {
     
     const [visualIdeas, setVisualIdeas] = useState<VisualIdeas | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isGeneratingMore, setIsGeneratingMore] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [selectedIdea, setSelectedIdea] = useState<string | null>(null)
     const [showPopup, setShowPopup] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState('literal')
 
-    useEffect(() => {
-        const fetchVisualIdeas = async () => {
-            try {
-                setIsLoading(true)
-                setError(null) // Clear any previous errors
-                const response = await fetch('/api/visualize', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        keyword,
-                        scriptContext: originalText
-                    }),
-                })
+    const fetchVisualIdeas = async () => {
+        try {
+            const response = await fetch('/api/visualize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    keyword,
+                    scriptContext: originalText
+                }),
+            })
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch visual ideas')
-                }
-
-                const data = await response.json()
-                setVisualIdeas(data)
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred')
-            } finally {
-                setIsLoading(false)
+            if (!response.ok) {
+                throw new Error('Failed to fetch visual ideas')
             }
-        }
 
-        fetchVisualIdeas()
+            return await response.json()
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred')
+            return null
+        }
+    }
+
+    useEffect(() => {
+        const getInitialIdeas = async () => {
+            setIsLoading(true)
+            setError(null)
+            const data = await fetchVisualIdeas()
+            if (data) {
+                setVisualIdeas(data)
+            }
+            setIsLoading(false)
+        }
+        getInitialIdeas()
     }, [keyword, originalText])
+
+    const handleGenerateMore = async () => {
+        setIsGeneratingMore(true)
+        const newIdeasData = await fetchVisualIdeas()
+        if (newIdeasData && visualIdeas) {
+            const updatedVisuals = { ...visualIdeas.visuals }
+            
+            const cat = selectedCategory as keyof typeof updatedVisuals
+            const existingIdeas = new Set(updatedVisuals[cat])
+            const newIdeas = newIdeasData.visuals[cat].filter((idea: string) => !existingIdeas.has(idea))
+            updatedVisuals[cat] = [...updatedVisuals[cat], ...newIdeas]
+
+            setVisualIdeas({
+                ...visualIdeas,
+                visuals: updatedVisuals,
+            })
+        }
+        setIsGeneratingMore(false)
+    }
 
     const categories = visualIdeas ? Object.keys(visualIdeas.visuals) : []
     const ideasForSelectedCategory = visualIdeas
@@ -221,38 +246,14 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                 Failed to generate ideas
                             </div>
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     setError(null)
                                     setIsLoading(true)
-                                    // Trigger the useEffect to refetch
-                                    const fetchVisualIdeas = async () => {
-                                        try {
-                                            setIsLoading(true)
-                                            setError(null)
-                                            const response = await fetch('/api/visualize', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({
-                                                    keyword,
-                                                    scriptContext: originalText
-                                                }),
-                                            })
-
-                                            if (!response.ok) {
-                                                throw new Error('Failed to fetch visual ideas')
-                                            }
-
-                                            const data = await response.json()
-                                            setVisualIdeas(data)
-                                        } catch (err) {
-                                            setError(err instanceof Error ? err.message : 'An error occurred')
-                                        } finally {
-                                            setIsLoading(false)
-                                        }
+                                    const data = await fetchVisualIdeas()
+                                    if (data) {
+                                        setVisualIdeas(data)
                                     }
-                                    fetchVisualIdeas()
+                                    setIsLoading(false)
                                 }}
                                 style={{
                                     background: 'none',
@@ -449,6 +450,38 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                     `}</style>
                                 </div>
                             ))}
+                            {/* Generate More Ideas Button */}
+                            <div
+                                style={{
+                                    padding: '1rem',
+                                    backgroundColor: 'transparent',
+                                    border: '2px dashed var(--tt-gray-light-a-200)',
+                                    borderRadius: '0.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: isGeneratingMore ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    opacity: isGeneratingMore ? 0.6 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isGeneratingMore) {
+                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)';
+                                        e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isGeneratingMore) {
+                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-200)';
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                    }
+                                }}
+                                onClick={!isGeneratingMore ? handleGenerateMore : undefined}
+                            >
+                                <span style={{ fontFamily: '"Inter", sans-serif', fontSize: '0.875rem', color: 'var(--tt-theme-text)' }}>
+                                    {isGeneratingMore ? 'Generating...' : '+ Generate More'}
+                                </span>
+                            </div>
                         </div>
                     )}
 

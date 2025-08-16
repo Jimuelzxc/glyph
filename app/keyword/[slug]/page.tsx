@@ -65,6 +65,11 @@ export default function KeywordPage({ params }: KeywordPageProps) {
 
     useEffect(() => {
         const getInitialIdeas = async () => {
+            if (!originalText) {
+                setError('No script context found. Please go back to the editor and select text to analyze first.');
+                setIsLoading(false);
+                return;
+            }
             setIsLoading(true)
             setError(null)
             const data = await fetchVisualIdeas()

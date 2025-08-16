@@ -13,9 +13,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Keyword is required' }, { status: 400 });
         }
 
+        if (!scriptContext) {
+            return NextResponse.json({ error: 'Script context is required' }, { status: 400 });
+        }
+
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext || 'No script context provided'}`,
+            contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext}`,
             config: {
                 systemInstruction: `You are the Visualization Ideator Agent.
 

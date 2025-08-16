@@ -68,13 +68,30 @@ export default function KeywordPage({ params }: KeywordPageProps) {
         fetchVisualIdeas()
     }, [keyword, originalText])
 
-    const allIdeas = visualIdeas ? [
-        ...visualIdeas.visuals.literal,
-        ...visualIdeas.visuals.metaphorical,
-        ...visualIdeas.visuals.characters,
-        ...visualIdeas.visuals.objects,
-        ...visualIdeas.visuals.icons
-    ] : []
+    const allIdeas = visualIdeas
+        ? [
+              ...visualIdeas.visuals.literal.map((idea) => ({
+                  idea,
+                  category: 'Literal',
+              })),
+              ...visualIdeas.visuals.metaphorical.map((idea) => ({
+                  idea,
+                  category: 'Metaphorical',
+              })),
+              ...visualIdeas.visuals.characters.map((idea) => ({
+                  idea,
+                  category: 'Characters',
+              })),
+              ...visualIdeas.visuals.objects.map((idea) => ({
+                  idea,
+                  category: 'Objects',
+              })),
+              ...visualIdeas.visuals.icons.map((idea) => ({
+                  idea,
+                  category: 'Icons',
+              })),
+          ]
+        : []
 
     return (
         <div style={{ 
@@ -297,7 +314,7 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                                     }}
                                     onClick={() => {
-                                        setSelectedIdea(idea)
+                                        setSelectedIdea(idea.idea)
                                         setShowPopup(true)
                                         // Add a subtle click animation
                                         const element = document.querySelector(`.idea-card-${index}`) as HTMLElement
@@ -325,7 +342,18 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                                         transition: 'all 0.3s ease',
                                         position: 'relative'
                                     }}>
-                                        {idea}
+                                        <div
+                                            style={{
+                                                fontSize: '0.65rem',
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                                opacity: 0.5,
+                                                marginBottom: '0.5rem',
+                                            }}
+                                        >
+                                            {idea.category}
+                                        </div>
+                                        {idea.idea}
                                         <div style={{
                                             position: 'absolute',
                                             bottom: '-0.5rem',

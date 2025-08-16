@@ -131,12 +131,65 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                     {isLoading && (
                         <div style={{
                             textAlign: 'center',
-                            padding: '2rem 0',
-                            color: 'var(--tt-theme-text)',
-                            opacity: 0.6,
+                            padding: '3rem 0',
                             fontFamily: '"Inter", sans-serif'
                         }}>
-                            Generating visual ideas...
+                            {/* Loading Animation */}
+                            <div style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                marginBottom: '1rem'
+                            }}>
+                                <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--tt-theme-text)',
+                                    opacity: 0.3,
+                                    animation: 'pulse 1.5s ease-in-out infinite',
+                                    animationDelay: '0s'
+                                }} />
+                                <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--tt-theme-text)',
+                                    opacity: 0.3,
+                                    animation: 'pulse 1.5s ease-in-out infinite',
+                                    animationDelay: '0.2s'
+                                }} />
+                                <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--tt-theme-text)',
+                                    opacity: 0.3,
+                                    animation: 'pulse 1.5s ease-in-out infinite',
+                                    animationDelay: '0.4s'
+                                }} />
+                            </div>
+                            <div style={{
+                                color: 'var(--tt-theme-text)',
+                                opacity: 0.6,
+                                fontSize: '0.875rem'
+                            }}>
+                                Generating visual ideas...
+                            </div>
+                            
+                            {/* CSS Animation */}
+                            <style jsx>{`
+                                @keyframes pulse {
+                                    0%, 80%, 100% {
+                                        opacity: 0.3;
+                                        transform: scale(1);
+                                    }
+                                    40% {
+                                        opacity: 1;
+                                        transform: scale(1.2);
+                                    }
+                                }
+                            `}</style>
                         </div>
                     )}
 
@@ -225,31 +278,71 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                             {allIdeas.map((idea, index) => (
                                 <div
                                     key={index}
+                                    className={`idea-card-${index}`}
                                     style={{
                                         padding: '1rem',
                                         backgroundColor: 'var(--tt-bg-color-contrast)',
-                                        border: '1px solid var(--tt-gray-light-a-100)',
-                                        borderRadius: '0.375rem',
+                                        border: '2px solid var(--tt-gray-light-a-100)',
+                                        borderRadius: '0.5rem',
                                         cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                         fontFamily: '"Inter", sans-serif',
                                         fontSize: '0.875rem',
                                         lineHeight: '1.4',
-                                        color: 'var(--tt-theme-text)'
+                                        color: 'var(--tt-theme-text)',
+                                        transform: 'scale(1)',
+                                        transformOrigin: 'center',
+                                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                                     }}
                                     onClick={() => {
                                         navigator.clipboard.writeText(idea)
+                                        // Add a subtle click animation
+                                        const element = document.querySelector(`.idea-card-${index}`) as HTMLElement
+                                        if (element) {
+                                            element.style.transform = 'scale(0.95)'
+                                            setTimeout(() => {
+                                                element.style.transform = 'scale(1.05)'
+                                            }, 100)
+                                        }
                                     }}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)'
-                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-200)'
+                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)'
+                                        e.currentTarget.style.transform = 'scale(1.05)'
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15)'
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.backgroundColor = 'var(--tt-bg-color-contrast)'
                                         e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-100)'
+                                        e.currentTarget.style.transform = 'scale(1)'
+                                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
                                     }}
                                 >
-                                    {idea}
+                                    <div style={{
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative'
+                                    }}>
+                                        {idea}
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '-0.5rem',
+                                            right: '0',
+                                            fontSize: '0.75rem',
+                                            opacity: 0,
+                                            color: 'var(--tt-theme-text)',
+                                            transition: 'opacity 0.3s ease',
+                                            pointerEvents: 'none'
+                                        }} className={`copy-hint-${index}`}>
+                                            click to copy
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Add hover effect for copy hint */}
+                                    <style jsx>{`
+                                        .idea-card-${index}:hover .copy-hint-${index} {
+                                            opacity: 0.5;
+                                        }
+                                    `}</style>
                                 </div>
                             ))}
                         </div>

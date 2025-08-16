@@ -15,13 +15,11 @@ export async function POST(request: NextRequest) {
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Keyword/Phrase: ${keyword}`,
+            contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext || 'No script context provided'}`,
             config: {
                 systemInstruction: `You are the Visualization Ideator Agent.
 
 Your role: You specialize in generating creative, context-aware visual ideas for scripts and stories.
-
-Script Context: ${scriptContext || 'No script context provided'}
 
 You will receive:
 - A single keyword

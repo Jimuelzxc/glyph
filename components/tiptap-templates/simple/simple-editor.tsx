@@ -64,6 +64,7 @@ import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
+import { useRouter } from "next/navigation"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
@@ -188,6 +189,7 @@ const MobileToolbarContent = ({
 export function SimpleEditor() {
   const isMobile = useIsMobile()
   const { height } = useWindowSize()
+  const router = useRouter()
   const [mobileView, setMobileView] = React.useState<
     "main" | "highlighter" | "link"
   >("main")
@@ -235,6 +237,9 @@ export function SimpleEditor() {
         multicolor: true,
         onHighlightClick: (text: string, color?: string) => {
           console.log('Clicked highlighted text:', { text, color })
+          // Navigate to the keyword page
+          const encodedKeyword = encodeURIComponent(text.trim())
+          router.push(`/keyword/${encodedKeyword}`)
         }
       }),
       Image,

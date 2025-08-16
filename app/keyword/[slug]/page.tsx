@@ -36,6 +36,7 @@ export default function KeywordPage({ params }: KeywordPageProps) {
     const [error, setError] = useState<string | null>(null)
     const [selectedIdea, setSelectedIdea] = useState<string | null>(null)
     const [showPopup, setShowPopup] = useState(false)
+    const [selectedCategory, setSelectedCategory] = useState('literal')
 
     useEffect(() => {
         const fetchVisualIdeas = async () => {
@@ -69,28 +70,10 @@ export default function KeywordPage({ params }: KeywordPageProps) {
         fetchVisualIdeas()
     }, [keyword, originalText])
 
-    const allIdeas = visualIdeas
-        ? [
-              ...visualIdeas.visuals.literal.map((idea) => ({
-                  idea,
-                  category: 'Literal',
-              })),
-              ...visualIdeas.visuals.metaphorical.map((idea) => ({
-                  idea,
-                  category: 'Metaphorical',
-              })),
-              ...visualIdeas.visuals.characters.map((idea) => ({
-                  idea,
-                  category: 'Characters',
-              })),
-              ...visualIdeas.visuals.objects.map((idea) => ({
-                  idea,
-                  category: 'Objects',
-              })),
-              ...visualIdeas.visuals.icons.map((idea) => ({
-                  idea,
-                  category: 'Icons',
-              })),
+    const categories = visualIdeas ? Object.keys(visualIdeas.visuals) : []
+    const ideasForSelectedCategory = visualIdeas
+        ? visualIdeas.visuals[
+              selectedCategory as keyof typeof visualIdeas.visuals
           ]
         : []
 
@@ -297,91 +280,170 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                         </div>
                     )}
 
+                    {/* Category Filters */}
+                    {visualIdeas && !isLoading && (
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                marginBottom: '1.5rem',
+                                borderBottom:
+                                    '1px solid var(--tt-gray-light-a-100)',
+                                paddingBottom: '1rem',
+                            }}
+                        >
+                            {categories.map((category) => (
+                                <button
+                                    key={category}
+                                    onClick={() => setSelectedCategory(category)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        padding: '0.5rem 0',
+                                        cursor: 'pointer',
+                                        fontFamily: '"Inter", sans-serif',
+                                        fontSize: '0.875rem',
+                                        color: 'var(--tt-theme-text)',
+                                        opacity:
+                                            selectedCategory === category
+                                                ? 1
+                                                : 0.5,
+                                        fontWeight:
+                                            selectedCategory === category
+                                                ? '600'
+                                                : '400',
+                                        textTransform: 'capitalize',
+                                        position: 'relative',
+                                        transition: 'opacity 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (selectedCategory !== category) {
+                                            e.currentTarget.style.opacity = '0.8'
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (selectedCategory !== category) {
+                                            e.currentTarget.style.opacity = '0.5'
+                                        }
+                                    }}
+                                >
+                                    {category}
+                                    {selectedCategory === category && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                bottom: '-17px',
+                                                left: 0,
+                                                right: 0,
+                                                height: '2px',
+                                                backgroundColor:
+                                                    'var(--tt-theme-text)',
+                                            }}
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Visual Ideas Grid */}
                     {visualIdeas && !isLoading && (
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                            gap: '0.75rem',
-                            marginTop: '1rem'
-                        }}>
-                            {allIdeas.map((idea, index) => (
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns:
+                                    'repeat(auto-fit, minmax(200px, 1fr))',
+                                gap: '0.75rem',
+                                marginTop: '1rem',
+                            }}
+                        >
+                            {ideasForSelectedCategory.map((idea, index) => (
                                 <div
                                     key={index}
                                     className={`idea-card-${index}`}
                                     style={{
                                         padding: '1rem',
-                                        backgroundColor: 'var(--tt-bg-color-contrast)',
+                                        backgroundColor:
+                                            'var(--tt-bg-color-contrast)',
                                         border: '2px solid var(--tt-gray-light-a-100)',
                                         borderRadius: '0.5rem',
                                         cursor: 'pointer',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        transition:
+                                            'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                         fontFamily: '"Inter", sans-serif',
                                         fontSize: '0.875rem',
                                         lineHeight: '1.4',
                                         color: 'var(--tt-theme-text)',
                                         transform: 'scale(1)',
                                         transformOrigin: 'center',
-                                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                        boxShadow:
+                                            '0 2px 4px rgba(0, 0, 0, 0.1)',
                                     }}
                                     onClick={() => {
-                                        setSelectedIdea(idea.idea)
+                                        setSelectedIdea(idea)
                                         setShowPopup(true)
                                         // Add a subtle click animation
-                                        const element = document.querySelector(`.idea-card-${index}`) as HTMLElement
+                                        const element = document.querySelector(
+                                            `.idea-card-${index}`
+                                        ) as HTMLElement
                                         if (element) {
-                                            element.style.transform = 'scale(0.95)'
+                                            element.style.transform =
+                                                'scale(0.95)'
                                             setTimeout(() => {
-                                                element.style.transform = 'scale(1.05)'
+                                                element.style.transform =
+                                                    'scale(1.05)'
                                             }, 100)
                                         }
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'var(--tt-gray-light-a-50)'
-                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-300)'
-                                        e.currentTarget.style.transform = 'scale(1.05)'
-                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.15)'
+                                        e.currentTarget.style.backgroundColor =
+                                            'var(--tt-gray-light-a-50)'
+                                        e.currentTarget.style.borderColor =
+                                            'var(--tt-gray-light-a-300)'
+                                        e.currentTarget.style.transform =
+                                            'scale(1.05)'
+                                        e.currentTarget.style.boxShadow =
+                                            '0 8px 16px rgba(0, 0, 0, 0.15)'
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'var(--tt-bg-color-contrast)'
-                                        e.currentTarget.style.borderColor = 'var(--tt-gray-light-a-100)'
-                                        e.currentTarget.style.transform = 'scale(1)'
-                                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+                                        e.currentTarget.style.backgroundColor =
+                                            'var(--tt-bg-color-contrast)'
+                                        e.currentTarget.style.borderColor =
+                                            'var(--tt-gray-light-a-100)'
+                                        e.currentTarget.style.transform =
+                                            'scale(1)'
+                                        e.currentTarget.style.boxShadow =
+                                            '0 2px 4px rgba(0, 0, 0, 0.1)'
                                     }}
                                 >
-                                    <div style={{
-                                        transition: 'all 0.3s ease',
-                                        position: 'relative'
-                                    }}>
+                                    <div
+                                        style={{
+                                            transition: 'all 0.3s ease',
+                                            position: 'relative',
+                                        }}
+                                    >
+                                        {idea}
                                         <div
                                             style={{
-                                                fontSize: '0.65rem',
-                                                fontWeight: 'bold',
-                                                textTransform: 'uppercase',
-                                                opacity: 0.5,
-                                                marginBottom: '0.5rem',
+                                                position: 'absolute',
+                                                bottom: '-0.5rem',
+                                                right: '0',
+                                                fontSize: '0.75rem',
+                                                opacity: 0,
+                                                color: 'var(--tt-theme-text)',
+                                                transition: 'opacity 0.3s ease',
+                                                pointerEvents: 'none',
                                             }}
+                                            className={`copy-hint-${index}`}
                                         >
-                                            {idea.category}
-                                        </div>
-                                        {idea.idea}
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '-0.5rem',
-                                            right: '0',
-                                            fontSize: '0.75rem',
-                                            opacity: 0,
-                                            color: 'var(--tt-theme-text)',
-                                            transition: 'opacity 0.3s ease',
-                                            pointerEvents: 'none'
-                                        }} className={`copy-hint-${index}`}>
                                             click to search
                                         </div>
                                     </div>
-                                    
+
                                     {/* Add hover effect for copy hint */}
                                     <style jsx>{`
-                                        .idea-card-${index}:hover .copy-hint-${index} {
+                                        .idea-card-${index}:hover
+                                            .copy-hint-${index} {
                                             opacity: 0.5;
                                         }
                                     `}</style>
@@ -389,16 +451,20 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                             ))}
                         </div>
                     )}
-                    
-                    {allIdeas.length === 0 && !isLoading && !error && (
-                        <div style={{
-                            textAlign: 'center',
-                            padding: '2rem 0',
-                            color: 'var(--tt-theme-text)',
-                            opacity: 0.6,
-                            fontFamily: '"Inter", sans-serif'
-                        }}>
-                            No ideas generated
+
+                    {ideasForSelectedCategory.length === 0 &&
+                    !isLoading &&
+                    !error && (
+                        <div
+                            style={{
+                                textAlign: 'center',
+                                padding: '2rem 0',
+                                color: 'var(--tt-theme-text)',
+                                opacity: 0.6,
+                                fontFamily: '"Inter", sans-serif',
+                            }}
+                        >
+                            No ideas generated for this category
                         </div>
                     )}
                 </div>

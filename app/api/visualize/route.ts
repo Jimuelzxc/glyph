@@ -7,7 +7,9 @@ const ai = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { keyword, scriptContext } = await request.json();
+    const { keyword, scriptContext, allHighlightedKeywords } =
+      await request.json();
+    console.log("All Highlighted Keywords:", allHighlightedKeywords);
 
     if (!keyword) {
       return NextResponse.json(
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext}`,
+      contents: `Keyword/Phrase: ${keyword}\n\nAll Highlighted Keywords: ${allHighlightedKeywords}\n\nScript Context: ${scriptContext}`,
       config: {
         systemInstruction: `You are the Visualization Ideator Agent.
 
@@ -33,7 +35,8 @@ Your role: You specialize in generating creative, context-aware visual ideas for
 
 
 Your job:
-- Always use the Script Context above to interpret the meaning of the keyword or phrase.
+- Always use the Script Context and All Highlighted Keywords above to interpret the meaning of the keyword or phrase.
+- Your main goal is to find the connection between the keywords and provide ideas that are interconnected.
 - If the keyword has multiple meanings, choose the interpretation that best fits the script context.
 - Suggest visuals grouped into the following categories:
     1. Literal — Presenting visuals in a straightforward and direct manner without abstract interpretations. This can include showing real-life objects or scenes as they are.
@@ -46,7 +49,6 @@ Your job:
 Guidelines:
 - USE SIMPLE ENGLISH and EASY WORDS
 - Provide at least 2–3 suggestions for each category.
-- Keep suggestions short (3–8 words each).
 - Avoid repeating the same idea in multiple categories.
 - If multiple keywords are provided, you may combine them for richer suggestions.
 

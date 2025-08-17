@@ -65,6 +65,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 import { useRouter } from "next/navigation"
+import { useChunkStore } from "@/lib/store"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
@@ -190,6 +191,7 @@ export function SimpleEditor() {
   const isMobile = useIsMobile()
   const { height } = useWindowSize()
   const router = useRouter()
+  const { keywords } = useChunkStore()
   const [mobileView, setMobileView] = React.useState<
     "main" | "highlighter" | "link"
   >("main")
@@ -233,14 +235,23 @@ export function SimpleEditor() {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
-      ClickableHighlight.configure({ 
+      ClickableHighlight.configure({
         multicolor: true,
         onHighlightClick: (text: string, color?: string) => {
           console.log('Clicked highlighted text:', { text, color })
+          // Persist keywords before navigating
+          localStorage.setItem(
+            'glyph-script-context',
+            JSON.stringify({
+              state: {
+                keywords: keywords,
+              },
+            })
+          )
           // Navigate to the keyword page
           const encodedKeyword = encodeURIComponent(text.trim())
           router.push(`/keyword/${encodedKeyword}`)
-        }
+        },
       }),
       Image,
       Typography,

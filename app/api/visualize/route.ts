@@ -9,7 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     const { keyword, scriptContext, allHighlightedKeywords } =
       await request.json();
-    console.log("All Highlighted Keywords:", allHighlightedKeywords);
+    
+    const extractedKeywords = allHighlightedKeywords.flatMap((chunk: any) => chunk.data);
+    console.log("All Highlighted Keywords:", extractedKeywords);
 
     if (!keyword) {
       return NextResponse.json(
@@ -27,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Keyword/Phrase: ${keyword}\n\nAll Highlighted Keywords: ${allHighlightedKeywords}\n\nScript Context: ${scriptContext}`,
+      contents: `Keyword/Phrase: ${keyword}\n\nAll Highlighted Keywords: ${extractedKeywords.join(', ')}\n\nScript Context: ${scriptContext}`,
       config: {
         systemInstruction: `You are the Visualization Ideator Agent.
 

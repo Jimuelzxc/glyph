@@ -51,7 +51,10 @@ export const useChunkStore = create<ChunkState>()(
         }),
         {
             name: 'glyph-script-context', // name of the item in the storage (must be unique)
-            partialize: (state) => ({ originalText: state.originalText }), // only persist a part of the store
+            partialize: (state) => ({
+                originalText: state.originalText,
+                keywords: state.keywords,
+            }),
         }
     )
 )

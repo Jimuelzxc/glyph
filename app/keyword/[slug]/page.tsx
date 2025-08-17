@@ -29,7 +29,7 @@ export default function KeywordPage({ params }: KeywordPageProps) {
     const keyword = decodeURIComponent(resolvedParams.slug)
     const keywordType = keyword.includes(' ') ? 'phrase' : 'keyword'
     const router = useRouter()
-    const { originalText } = useChunkStore()
+    const { originalText, keywords } = useChunkStore()
     const hasFetched = useRef(false)
     
     const [visualIdeas, setVisualIdeas] = useState<VisualIdeas | null>(null)
@@ -49,7 +49,8 @@ export default function KeywordPage({ params }: KeywordPageProps) {
                 },
                 body: JSON.stringify({
                     keyword,
-                    scriptContext: originalText
+                    scriptContext: originalText,
+                    allHighlightedKeywords: keywords
                 }),
             })
 

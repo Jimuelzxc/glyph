@@ -1,46 +1,50 @@
-import { GoogleGenAI } from '@google/genai';
-import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenAI } from "@google/genai";
+import { NextRequest, NextResponse } from "next/server";
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY!
+  apiKey: process.env.GEMINI_API_KEY!,
 });
 
 export async function POST(request: NextRequest) {
-    try {
-        const { keyword, scriptContext } = await request.json();
+  try {
+    const { keyword, scriptContext } = await request.json();
 
-        if (!keyword) {
-            return NextResponse.json({ error: 'Keyword is required' }, { status: 400 });
-        }
+    if (!keyword) {
+      return NextResponse.json(
+        { error: "Keyword is required" },
+        { status: 400 }
+      );
+    }
 
-        if (!scriptContext) {
-            return NextResponse.json({ error: 'Script context is required' }, { status: 400 });
-        }
+    if (!scriptContext || scriptContext.trim().length === 0) {
+      return NextResponse.json(
+        { error: "Script context cannot be empty" },
+        { status: 400 }
+      );
+    }
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext}`,
-            config: {
-                systemInstruction: `You are the Visualization Ideator Agent.
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Keyword/Phrase: ${keyword}\n\nScript Context: ${scriptContext}`,
+      config: {
+        systemInstruction: `You are the Visualization Ideator Agent.
 
 Your role: You specialize in generating creative, context-aware visual ideas for scripts and stories.
 
-You will receive:
-- A single keyword
-- A short list of keywords
-- OR a full phrase
 
 Your job:
 - Always use the Script Context above to interpret the meaning of the keyword or phrase.
 - If the keyword has multiple meanings, choose the interpretation that best fits the script context.
 - Suggest visuals grouped into the following categories:
-    1. Literal — Direct, straightforward depictions of the word/phrase.
-    2. Metaphorical — Symbolic or abstract representations.
-    3. Characters — People or figures that could embody the concept.
-    4. Objects — Physical, concrete items tied to the concept's setting or theme.
+    1. Literal — Presenting visuals in a straightforward and direct manner without abstract interpretations. This can include showing real-life objects or scenes as they are.
+    2. Metaphorical — Using symbols, metaphors, or abstract representations to convey ideas or concepts.
+    3. Characters — Incorporating animated characters to convey emotions, actions, or narratives. These characters can be human, animal, or even abstract figures.
+
+    4. Objects — respond with ONLY single keywords (not keyphrases or sentences), e.g., Clock/Time → Experience."
     5. Icons — Minimal, symbolic visuals that communicate the concept simply.
 
 Guidelines:
+- USE SIMPLE ENGLISH and EASY WORDS
 - Provide at least 2–3 suggestions for each category.
 - Keep suggestions short (3–8 words each).
 - Avoid repeating the same idea in multiple categories.
@@ -57,19 +61,18 @@ Output: Return a valid JSON object with this structure:
     "icons": ["idea1", "idea2", ...]
   }
 }`,
-                responseMimeType: "application/json"
-            }
-        });
+        responseMimeType: "application/json",
+      },
+    });
 
-        const result = JSON.parse(response.text || '{}');
+    const result = JSON.parse(response.text || "{}");
 
-        return NextResponse.json(result);
-
-    } catch (error) {
-        console.error('Error generating visual ideas:', error);
-        return NextResponse.json(
-            { error: 'Failed to generate visual ideas' },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error generating visual ideas:", error);
+    return NextResponse.json(
+      { error: "Failed to generate visual ideas" },
+      { status: 500 }
+    );
+  }
 }

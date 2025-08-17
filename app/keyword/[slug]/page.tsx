@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { use, useEffect, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { useChunkStore } from '@/lib/store'
 
 // Import TipTap styles to match the editor
@@ -30,6 +30,7 @@ export default function KeywordPage({ params }: KeywordPageProps) {
     const keywordType = keyword.includes(' ') ? 'phrase' : 'keyword'
     const router = useRouter()
     const { originalText } = useChunkStore()
+    const hasFetched = useRef(false)
     
     const [visualIdeas, setVisualIdeas] = useState<VisualIdeas | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -65,10 +66,15 @@ export default function KeywordPage({ params }: KeywordPageProps) {
 
     useEffect(() => {
         const getInitialIdeas = async () => {
-            if (!originalText) {
-                setError('No script context found. Please go back to the editor and select text to analyze first.');
-                setIsLoading(false);
-                return;
+            if (hasFetched.current) return;
+            hasFetched.current = true;
+
+            if (!originalText || originalText.trim().length === 0) {
+                setError(
+                    'No script context found. Please go back to the editor and select text to analyze first.'
+                )
+                setIsLoading(false)
+                return
             }
             setIsLoading(true)
             setError(null)

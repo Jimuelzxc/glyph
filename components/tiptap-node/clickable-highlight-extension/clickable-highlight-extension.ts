@@ -31,6 +31,8 @@ export const ClickableHighlight = Highlight.extend<ClickableHighlightOptions>({
 
   addOptions() {
     return {
+      multicolor: false,
+      HTMLAttributes: {},
       ...this.parent?.(),
       onHighlightClick: undefined,
     }
@@ -39,6 +41,9 @@ export const ClickableHighlight = Highlight.extend<ClickableHighlightOptions>({
   addProseMirrorPlugins() {
     const plugins = this.parent?.() || []
     
+    let lastClickTime = 0
+    const clickDebounce = 100 // ms
+
     plugins.push(
       new Plugin({
         key: new PluginKey('clickableHighlight'),
@@ -51,6 +56,15 @@ export const ClickableHighlight = Highlight.extend<ClickableHighlightOptions>({
               const highlightElement = target.closest('mark[data-type="highlight"]') as HTMLElement
               
               if (highlightElement && this.options.onHighlightClick) {
+                const now = Date.now()
+                if (now - lastClickTime < clickDebounce) {
+                  // If the click is too close to the last one, ignore it
+                  event.preventDefault()
+                  event.stopPropagation()
+                  return true
+                }
+                lastClickTime = now
+
                 event.preventDefault()
                 event.stopPropagation()
                 
@@ -73,7 +87,7 @@ export const ClickableHighlight = Highlight.extend<ClickableHighlightOptions>({
     return plugins
   },
 
-  renderHTML({ node, HTMLAttributes }) {
+  renderHTML({ HTMLAttributes }) {
     const { color, ...rest } = HTMLAttributes
     
     return [

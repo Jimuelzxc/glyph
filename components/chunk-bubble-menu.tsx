@@ -25,7 +25,7 @@ export function ChunkBubbleMenu({ editor }: ChunkBubbleMenuProps) {
   } = useChunkStore();
 
   const highlightKeywordsInEditor = (chunks: any[]) => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return
 
     // Get the current document content
     const doc = editor.state.doc;
